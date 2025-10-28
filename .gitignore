@@ -1,0 +1,33 @@
+# Node / build
+node_modules/
+dist/
+build/
+.tmp/
+.cache/
+.vite/
+.vercel/
+.netlify/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+frontend/.env
+backend/.env
+
+# Upload / artifacts
+*.zip
+*.tar
+*.gz
+
+# IDE
+.vscode/
+.idea/
