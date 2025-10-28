@@ -17,6 +17,12 @@ A complete modern app that lets users upload PDFs, ask questions in natural lang
 
 ---
 
+## 📍 Source Code
+
+✅ https://github.com/godwinm8/Google-NoteBookLM-Clone.git
+
+---
+
 # 🖥️ Frontend (React + Vite)
 
 ## ⚙️ Features
