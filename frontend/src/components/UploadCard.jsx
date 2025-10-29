@@ -2,7 +2,9 @@ import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { Upload } from "upload-js";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
+// const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+const API = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
 const PUBLIC_KEY = import.meta.env.VITE_UPLOAD_IO_PUBLIC_KEY;
 
 function Spinner() {
