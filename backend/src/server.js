@@ -20,6 +20,35 @@ const prodOrigins = (process.env.CLIENT_ORIGIN || "")
 // allow any preview of the *frontend* project
 const previewPattern = /^https:\/\/google-note-book-lm-clone-ods8-[a-z0-9-]+\.vercel\.app$/i;
 
+// ---- Preflight short-circuit (no redirects, no errors) ----
+app.use((req, res, next) => {
+  if (req.method !== "OPTIONS") return next();
+
+  const origin = req.headers.origin || "";
+  const norm = origin.replace(/\/$/, "");
+  const allowed =
+    (process.env.CLIENT_ORIGIN || "")
+      .split(",")
+      .map(s => s.trim().replace(/\/$/, ""))
+      .filter(Boolean)
+      .includes(norm) ||
+    /^https:\/\/google-note-book-lm-clone-ods8-[a-z0-9-]+\.vercel\.app$/i.test(norm);
+
+  if (!allowed) {
+    // still reply cleanly so browser doesn't see a redirect/error
+    res.setHeader("Vary", "Origin");
+    return res.status(403).end();
+  }
+
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  return res.sendStatus(204);
+});
+
+
 app.use(
   cors({
     origin: (origin, cb) => {
@@ -38,7 +67,7 @@ app.use(
     optionsSuccessStatus: 204,
   })
 );
-app.options("*", cors());
+// app.options("*", cors());
 
 
 

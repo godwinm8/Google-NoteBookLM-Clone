@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "./lib/api";
 import UploadCard from "./components/UploadCard";
 import PdfViewer from "./components/PdfViewer";
 import ReadyBanner from "./components/ReadyBanner";
 import ThreadCard from "./components/ThreadCard";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
+//const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export default function App() {
   const [pdf, setPdf] = useState(null);
@@ -45,7 +46,7 @@ export default function App() {
     if (!input.trim() || !pdf) return;
     setLoading(true);
     try {
-      const { data } = await axios.post(`${API}/api/chat`, {
+      const { data } = await api.post(`/api/chat`, {
         pdfId: pdf.pdfId,
         question: input,
       });

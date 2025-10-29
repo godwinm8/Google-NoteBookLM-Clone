@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../lib/api";
 import { Upload } from "upload-js";
 
 // const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-const API = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
+//const API = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
 const PUBLIC_KEY = import.meta.env.VITE_UPLOAD_IO_PUBLIC_KEY;
 
 function Spinner() {
@@ -106,7 +107,7 @@ export default function UploadCard({ onReady }) {
           ? fileUrl
           : fileUrl.replace("/file/", "/raw/");
 
-        const { data } = await axios.post(`${API}/api/upload/register`, {
+        const { data } = await api.post(`/api/upload/register`, {
           url: rawUrl,
           title: file.name,
         });
