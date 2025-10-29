@@ -6,7 +6,7 @@ import {
 } from "../controllers/upload.controller.js";
 
 const router = Router();
-const upload = multer({ dest: "tmp/" });
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/register", registerUploadedUrl);
 

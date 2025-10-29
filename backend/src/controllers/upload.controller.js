@@ -36,8 +36,14 @@ export const registerUploadedUrl = async (req, res) => {
 export const uploadPDFViaServer = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "file is required" });
+
     const formData = new FormData();
-    formData.append("file", fs.createReadStream(req.file.path));
+
+    formData.append("file", req.file.buffer, {
+      filename: req.file.originalname || "upload.pdf",
+      contentType: req.file.mimetype || "application/pdf",
+      knownLength: req.file.size,
+    });
 
     const response = await axios.post(
       "https://api.upload.io/v1/files/basic",
@@ -50,15 +56,17 @@ export const uploadPDFViaServer = async (req, res) => {
       }
     );
 
-    fs.unlinkSync(req.file.path);
     const fileUrl = response.data.fileUrl;
+    const rawUrl = fileUrl.includes("/raw/")
+      ? fileUrl
+      : fileUrl.replace("/file/", "/raw/");
     const result = await indexPdfByUrl(
-      fileUrl,
+      rawUrl,
       req.file.originalname || "Uploaded PDF"
     );
-    res.json(result);
+    return res.json(result);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
   }
 };
