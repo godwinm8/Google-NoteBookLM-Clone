@@ -12,20 +12,25 @@ import pdfRoutes from "./routes/pdf.routes.js";
 
 const app = express();
 
-const rawOrigins = (process.env.CLIENT_ORIGIN || "")
+// ==== CORS Handling (allow prod + preview) ====
+const prodOrigins = (process.env.CLIENT_ORIGIN || "")
   .split(",")
-  .map((s) => s.trim())
+  .map(s => s.trim().replace(/\/$/, ""))
   .filter(Boolean);
 
-const allowlist = rawOrigins.map((o) => o.replace(/\/$/, ""));
+// pattern to allow any preview deployment of the frontend project
+const previewPattern = /^https:\/\/google-note-book-lm-clone-ods8-[a-z0-9-]+\.vercel\.app$/i;
 
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
+      if (!origin) return cb(null, true); // server-to-server, curl, etc.
+
       const norm = origin.replace(/\/$/, "");
-      const ok = allowlist.some((o) => o === norm);
-      cb(ok ? null : new Error("Not allowed by CORS"), ok);
+      const whitelisted =
+        prodOrigins.includes(norm) || previewPattern.test(norm);
+
+      cb(whitelisted ? null : new Error("Not allowed by CORS"), whitelisted);
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -34,6 +39,7 @@ app.use(
   })
 );
 
+// Respond to preflight quickly
 app.options("*", cors());
 
 app.use(express.json({ limit: "10mb" }));
