@@ -12,7 +12,11 @@ import chatRoutes from "./routes/chat.routes.js";
 import pdfRoutes from "./routes/pdf.routes.js";
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_ORIGIN?.split(",") || "*" }));
+
+const origins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim())
+  : true;
+app.use(cors({ origin: origins }));
 app.use(express.json({ limit: "10mb" }));
 app.use(morgan("dev"));
 

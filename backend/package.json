@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^1.12.2",
     "chromadb": "^3.0.17",
+    "pdfjs-dist": "4.10.38",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",

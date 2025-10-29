@@ -8,12 +8,28 @@ import { indexPdfByUrl } from "../services/pdfIndex.service.js";
 export const registerUploadedUrl = async (req, res) => {
   try {
     const { url, title } = req.body;
-    if (!url) return res.status(400).json({ error: "url is required" });
+
+    if (!url || typeof url !== "string") {
+      return res
+        .status(400)
+        .json({ error: "A valid 'url' (string) is required" });
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      return res.status(400).json({ error: "Invalid URL format" });
+    }
+
+    console.log("[registerUploadedUrl] url:", url, "title:", title);
+
     const result = await indexPdfByUrl(url, title || "Untitled");
-    res.json(result);
+    return res.json(result);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    console.error("[registerUploadedUrl] failed:", e);
+    return res
+      .status(500)
+      .json({ error: e.message || "Internal Server Error" });
   }
 };
 

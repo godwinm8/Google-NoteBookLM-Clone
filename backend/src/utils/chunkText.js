@@ -1,7 +1,12 @@
-export function chunkText(text, chunkSize = 1200, overlap = 200) {
+export function chunkText(text = "", chunkSize = 1200, overlap = 200) {
+  if (typeof text !== "string") text = String(text ?? "");
+
+  if (!text.trim()) return [];
+
   const pages = text.split("\f");
   const chunks = [];
   let pageNum = 1;
+
   for (const pageText of pages) {
     let i = 0;
     while (i < pageText.length) {
@@ -12,5 +17,6 @@ export function chunkText(text, chunkSize = 1200, overlap = 200) {
     }
     pageNum += 1;
   }
+
   return chunks;
 }

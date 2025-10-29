@@ -1,5 +1,5 @@
-import fetch from "node-fetch";
 import axios from "axios";
+import OpenAI from "openai";
 import Pdf from "../models/PdfMetadata.model.js";
 import { getChromaCollection } from "./vectordb.service.js";
 import { chunkText } from "../utils/chunkText.js";
@@ -7,13 +7,26 @@ import { extractPdfTextAndPages } from "./pdfExtract.service.js";
 
 const LOCAL_EMBED_URL =
   process.env.LOCAL_EMBED_URL || "http://localhost:9000/embed";
+const EMBED_MODEL = process.env.EMBED_MODEL || "text-embedding-3-small";
+
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 async function embedTexts(texts) {
-  const res = await axios.post(LOCAL_EMBED_URL, { texts });
+  const input = texts.map((t) => (t ?? "").toString().slice(0, 7500));
 
+  if (openai) {
+    const resp = await openai.embeddings.create({
+      model: EMBED_MODEL,
+      input,
+    });
+    return resp.data.map((d) => d.embedding);
+  }
+
+  const res = await axios.post(LOCAL_EMBED_URL, { texts: input });
   const vectors = res.data?.embeddings ?? res.data?.vectors;
-
-  if (!Array.isArray(vectors) || vectors.length === 0) {
+  if (!Array.isArray(vectors) || !vectors.length) {
     throw new Error("Local embedder returned no embeddings");
   }
   return vectors;
@@ -26,6 +39,9 @@ export async function indexPdfByUrl(fileUrl, title) {
   const uint8 = new Uint8Array(ab);
 
   const { text, pages } = await extractPdfTextAndPages(uint8);
+  if (!text || !text.trim()) {
+    throw new Error("No text extracted from PDF");
+  }
 
   const chunks = chunkText(text, 800, 120);
   const collectionName = "pdf_" + Date.now();
@@ -52,6 +68,7 @@ export async function indexPdfByUrl(fileUrl, title) {
     sizeBytes: uint8.byteLength,
     collectionName,
   });
+  console.log(`✅ Indexed ${chunks.length} chunks for ${title}`);
 
   return { pdf: doc, chunks: chunks.length };
 }
