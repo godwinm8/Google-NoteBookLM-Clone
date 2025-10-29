@@ -1,27 +1,22 @@
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.node.mjs";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-pdfjs.GlobalWorkerOptions.workerSrc = undefined;
+export async function extractPdfTextAndPages(data) {
+  // Use the CDN worker so Vercel doesn't need local worker files
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js";
 
-export async function extractTextFromPdfBuffer(data) {
   const uint8 =
     data instanceof Uint8Array ? data : new Uint8Array(data.buffer ?? data);
 
-  const loadingTask = pdfjs.getDocument({
-    data: uint8,
-    isEvalSupported: false,
-    disableFontFace: true,
-    useWorkerFetch: false,
-  });
+  const loadingTask = pdfjsLib.getDocument({ data: uint8 });
+  const pdf = await loadingTask.promise;
 
-  const doc = await loadingTask.promise;
-  let text = "";
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i);
+  let fullText = "";
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
     const content = await page.getTextContent();
-    const pageText = content.items
-      .map((it) => (typeof it.str === "string" ? it.str : ""))
-      .join(" ");
-    text += (i > 1 ? "\f" : "") + pageText;
+    const text = content.items.map((it) => it.str).join(" ");
+    fullText += text + "\f";
   }
-  return { text, pages: doc.numPages };
+  return { text: fullText, pages: pdf.numPages };
 }
