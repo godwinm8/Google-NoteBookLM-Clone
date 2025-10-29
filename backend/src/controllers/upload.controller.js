@@ -75,7 +75,7 @@
 // backend/src/controllers/upload.controller.js
 import fetch from "node-fetch";
 import { extractPdfTextAndPages } from "../services/pdfExtract.service.js";
-import { Pdf } from "../models/PdfMetadata.model.js"; // whatever your model file is
+import  Pdf  from "../models/PdfMetadata.model.js"; // whatever your model file is
 
 export async function registerUploadedUrl(req, res) {
   try {
