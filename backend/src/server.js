@@ -12,16 +12,25 @@ import pdfRoutes from "./routes/pdf.routes.js";
 
 const app = express();
 
-const origins = process.env.CLIENT_ORIGIN
-  ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim())
-  : true;
+const rawOrigins = (process.env.CLIENT_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const allowlist = rawOrigins.map((o) => o.replace(/\/$/, ""));
 
 app.use(
   cors({
-    origin: origins,
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      const norm = origin.replace(/\/$/, "");
+      const ok = allowlist.some((o) => o === norm);
+      cb(ok ? null : new Error("Not allowed by CORS"), ok);
+    },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+    optionsSuccessStatus: 204,
   })
 );
 
