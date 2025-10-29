@@ -16,7 +16,17 @@ const origins = process.env.CLIENT_ORIGIN
   ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim())
   : true;
 
-app.use(cors({ origin: origins }));
+app.use(
+  cors({
+    origin: origins,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.options("*", cors());
+
 app.use(express.json({ limit: "10mb" }));
 app.use(morgan("dev"));
 
