@@ -161,13 +161,22 @@
 
 
 
-import pdfParse from "pdf-parse";
+// backend/src/services/pdfExtract.service.js
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse"); // CJS interop in ESM
 
-/**
- * Accepts Buffer | Uint8Array, returns { text, pages }
- */
-export async function extractPdfTextAndPages(data) {
-  const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
-  const { text, numpages } = await pdfParse(buf);
-  return { text, pages: numpages };
+export async function extractPdfTextAndPagesFromBuffer(buffer) {
+  const { text, numpages } = await pdfParse(buffer);
+  // separate pages with form-feed for downstream splitting (optional)
+  const normalized = text.replace(/\r\n/g, "\n");
+  return { text: normalized, pages: numpages ?? undefined };
 }
+
+export async function fetchAsBuffer(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Download failed: ${res.status} ${res.statusText}`);
+  const ab = await res.arrayBuffer();
+  return Buffer.from(ab);
+}
+

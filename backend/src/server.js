@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import mongoose from "mongoose";
-
+import { corsMiddleware } from "./middleware/cors.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import pdfRoutes from "./routes/pdf.routes.js";
@@ -72,11 +72,13 @@ app.use(
 
 
 app.use(express.json({ limit: "10mb" }));
+app.use(corsMiddleware); 
 app.use(morgan("dev"));
 
 app.get("/", (req, res) =>
   res.json({ status: "ok", service: "NotebookLM Backend" })
 );
+
 
 app.use("/api/upload", uploadRoutes);
 app.use("/api/chat", chatRoutes);

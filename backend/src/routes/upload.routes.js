@@ -1,15 +1,15 @@
-import { Router } from "express";
+// backend/src/routes/upload.routes.js
+import express from "express";
 import multer from "multer";
-import {
-  uploadPDFViaServer,
-  registerUploadedUrl,
-} from "../controllers/upload.controller.js";
+import { registerUploadedUrl, uploadPDFViaServer } from "../controllers/upload.controller.js";
 
-const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const router = express.Router();
+const upload = multer();
 
+router.options("/register", (_, res) => res.sendStatus(204)); // handle CORS preflight
 router.post("/register", registerUploadedUrl);
 
+router.options("/file", (_, res) => res.sendStatus(204));
 router.post("/file", upload.single("file"), uploadPDFViaServer);
 
 export default router;
