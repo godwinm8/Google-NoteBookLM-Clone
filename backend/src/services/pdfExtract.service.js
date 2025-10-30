@@ -128,33 +128,46 @@
 
 
 // ✅ Use the legacy Node build, not the ESM .mjs
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
+// import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 
+// export async function extractPdfTextAndPages(data) {
+//   // ⚠️ Absolutely no worker on the server
+//   pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
+
+//   const uint8 =
+//     data instanceof Uint8Array ? data : new Uint8Array(data.buffer ?? data);
+
+//   const loadingTask = pdfjsLib.getDocument({
+//     data: uint8,
+//     disableWorker: true,         // ← critical on Vercel/Node
+//     useWorkerFetch: false,
+//     isEvalSupported: false,
+//     // (optional) quieter logs:
+//     verbosity: pdfjsLib.VerbosityLevel.ERRORS,
+//   });
+
+//   const pdf = await loadingTask.promise;
+
+//   let fullText = "";
+//   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+//     const page = await pdf.getPage(pageNum);
+//     const content = await page.getTextContent();
+//     const text = content.items.map((it) => (it.str ?? "")).join(" ");
+//     fullText += text + "\f";
+//   }
+
+//   return { text: fullText, pages: pdf.numPages };
+// }
+
+
+
+import pdfParse from "pdf-parse";
+
+/**
+ * Accepts Buffer | Uint8Array, returns { text, pages }
+ */
 export async function extractPdfTextAndPages(data) {
-  // ⚠️ Absolutely no worker on the server
-  pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
-
-  const uint8 =
-    data instanceof Uint8Array ? data : new Uint8Array(data.buffer ?? data);
-
-  const loadingTask = pdfjsLib.getDocument({
-    data: uint8,
-    disableWorker: true,         // ← critical on Vercel/Node
-    useWorkerFetch: false,
-    isEvalSupported: false,
-    // (optional) quieter logs:
-    verbosity: pdfjsLib.VerbosityLevel.ERRORS,
-  });
-
-  const pdf = await loadingTask.promise;
-
-  let fullText = "";
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const content = await page.getTextContent();
-    const text = content.items.map((it) => (it.str ?? "")).join(" ");
-    fullText += text + "\f";
-  }
-
-  return { text: fullText, pages: pdf.numPages };
+  const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  const { text, numpages } = await pdfParse(buf);
+  return { text, pages: numpages };
 }
