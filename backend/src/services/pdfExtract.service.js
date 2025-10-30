@@ -94,24 +94,56 @@
 
 
 // ✅ use the legacy *JS* build (not the .mjs) and disable the worker
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.js";
+// import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.js";
+
+// export async function extractPdfTextAndPages(data) {
+//   // IMPORTANT: no worker in serverless
+//   GlobalWorkerOptions.workerSrc = null;
+
+//   const uint8 =
+//     data instanceof Uint8Array ? data : new Uint8Array(data.buffer ?? data);
+
+//   const loadingTask = getDocument({
+//     data: uint8,
+//     // serverless-friendly toggles
+//     disableWorker: true,
+//     useWorkerFetch: false,
+//     disableFontFace: true,
+//     isEvalSupported: false,
+//     disableRange: true,
+//     disableCreateObjectURL: true,
+//   });
+
+//   const pdf = await loadingTask.promise;
+
+//   let fullText = "";
+//   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+//     const page = await pdf.getPage(pageNum);
+//     const content = await page.getTextContent();
+//     const text = content.items.map(it => it.str).join(" ");
+//     fullText += text + "\f";
+//   }
+//   return { text: fullText, pages: pdf.numPages };
+// }
+
+
+// ✅ Use the legacy Node build, not the ESM .mjs
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 
 export async function extractPdfTextAndPages(data) {
-  // IMPORTANT: no worker in serverless
-  GlobalWorkerOptions.workerSrc = null;
+  // ⚠️ Absolutely no worker on the server
+  pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
 
   const uint8 =
     data instanceof Uint8Array ? data : new Uint8Array(data.buffer ?? data);
 
-  const loadingTask = getDocument({
+  const loadingTask = pdfjsLib.getDocument({
     data: uint8,
-    // serverless-friendly toggles
-    disableWorker: true,
+    disableWorker: true,         // ← critical on Vercel/Node
     useWorkerFetch: false,
-    disableFontFace: true,
     isEvalSupported: false,
-    disableRange: true,
-    disableCreateObjectURL: true,
+    // (optional) quieter logs:
+    verbosity: pdfjsLib.VerbosityLevel.ERRORS,
   });
 
   const pdf = await loadingTask.promise;
@@ -120,8 +152,9 @@ export async function extractPdfTextAndPages(data) {
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const content = await page.getTextContent();
-    const text = content.items.map(it => it.str).join(" ");
+    const text = content.items.map((it) => (it.str ?? "")).join(" ");
     fullText += text + "\f";
   }
+
   return { text: fullText, pages: pdf.numPages };
 }
