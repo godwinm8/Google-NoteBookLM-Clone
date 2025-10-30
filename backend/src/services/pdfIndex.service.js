@@ -4,7 +4,9 @@ import Pdf from "../models/PdfMetadata.model.js";
 import { getChromaCollection } from "./vectordb.service.js";
 import { chunkText } from "../utils/chunkText.js";
 //import { extractPdfTextAndPages } from "./pdfExtract.service.js";
+//import { fetchAsBuffer, extractPdfTextAndPagesFromBuffer } from "./pdfExtract.service.js";
 import { fetchAsBuffer, extractPdfTextAndPagesFromBuffer } from "./pdfExtract.service.js";
+
 
 
 const LOCAL_EMBED_URL =

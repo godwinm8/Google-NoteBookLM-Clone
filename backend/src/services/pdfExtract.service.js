@@ -161,22 +161,39 @@
 
 
 
-// backend/src/services/pdfExtract.service.js
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse"); // CJS interop in ESM
+import { PDFParser } from "pdf2json";
 
 export async function extractPdfTextAndPagesFromBuffer(buffer) {
-  const { text, numpages } = await pdfParse(buffer);
-  // separate pages with form-feed for downstream splitting (optional)
-  const normalized = text.replace(/\r\n/g, "\n");
-  return { text: normalized, pages: numpages ?? undefined };
+  return new Promise((resolve, reject) => {
+    const pdfParser = new PDFParser();
+
+    pdfParser.on("pdfParser_dataError", (errData) => reject(errData.parserError));
+
+    pdfParser.on("pdfParser_dataReady", (pdfData) => {
+      try {
+        let text = "";
+        pdfData?.formImage?.Pages?.forEach((page) => {
+          page.Texts.forEach((t) => {
+            const part = t.R.map((r) => decodeURIComponent(r.T)).join(" ");
+            text += part + " ";
+          });
+          text += "\n\n"; // page separator
+        });
+
+        const numpages = pdfData?.formImage?.Pages?.length || 0;
+        resolve({ text, pages: numpages });
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    pdfParser.parseBuffer(buffer);
+  });
 }
 
 export async function fetchAsBuffer(url) {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Download failed: ${res.status} ${res.statusText}`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
   const ab = await res.arrayBuffer();
   return Buffer.from(ab);
 }
-
