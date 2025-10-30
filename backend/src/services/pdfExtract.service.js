@@ -1,5 +1,6 @@
-
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+// backend/src/services/pdfExtract.service.js
+// use ESM entry and disable worker (serverless has no worker file path)
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 pdfjs.GlobalWorkerOptions.workerSrc = undefined;
 
 export async function extractPdfTextAndPages(uint8) {
@@ -9,16 +10,13 @@ export async function extractPdfTextAndPages(uint8) {
     disableFontFace: true,
     useSystemFonts: true,
   });
-
   const pdf = await loadingTask.promise;
-  let text = '';
 
+  let text = "";
   for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
     const page = await pdf.getPage(pageNo);
     const content = await page.getTextContent();
-    const pageText = content.items.map(it => it.str).join(' ');
-    text += pageText + '\n';
+    text += content.items.map(it => it.str).join(" ") + "\n";
   }
-
   return { text, pages: pdf.numPages };
 }
