@@ -1,4 +1,4 @@
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+import  pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 pdfjs.GlobalWorkerOptions.workerSrc = undefined;
 
 export async function extractPdfTextAndPages(uint8) {
