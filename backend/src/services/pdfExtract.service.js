@@ -161,7 +161,7 @@
 
 
 
-import { PDFParser } from "pdf2json";
+import  PDFParser  from "pdf2json";
 
 export async function extractPdfTextAndPagesFromBuffer(buffer) {
   return new Promise((resolve, reject) => {
