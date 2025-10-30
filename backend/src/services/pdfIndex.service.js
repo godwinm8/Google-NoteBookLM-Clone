@@ -5,7 +5,8 @@ import { getChromaCollection } from "./vectordb.service.js";
 import { chunkText } from "../utils/chunkText.js";
 //import { extractPdfTextAndPages } from "./pdfExtract.service.js";
 //import { fetchAsBuffer, extractPdfTextAndPagesFromBuffer } from "./pdfExtract.service.js";
-import { fetchAsBuffer, extractPdfTextAndPagesFromBuffer } from "./pdfExtract.service.js";
+//import { fetchAsBuffer, extractPdfTextAndPagesFromBuffer } from "./pdfExtract.service.js";
+import { extractPdfTextAndPages } from "./pdfExtract.service.js";
 
 
 
@@ -37,19 +38,19 @@ async function embedTexts(texts) {
 }
 
 export async function indexPdfByUrl(fileUrl, title) {
-  // const resp = await fetch(fileUrl);
-  // if (!resp.ok) throw new Error(`Failed to download PDF: ${resp.status}`);
-  // const ab = await resp.arrayBuffer();
-  // const uint8 = new Uint8Array(ab);
+  const resp = await fetch(fileUrl);
+  if (!resp.ok) throw new Error(`Failed to download PDF: ${resp.status}`);
+  const ab = await resp.arrayBuffer();
+  const uint8 = new Uint8Array(ab);
 
   // const { text, pages } = await extractPdfTextAndPages(uint8);
 
-  const buffer = await fetchAsBuffer(fileUrl);
+  //const buffer = await fetchAsBuffer(fileUrl);
 
-const { text, pages } = await extractPdfTextAndPagesFromBuffer(buffer);
+const { text, pages } = await extractPdfTextAndPages(unit8);
 
   if (!text || !text.trim()) {
-    throw new Error("No text extracted from PDF");
+    throw new Error("No text extracted from PDF (likely a scanned PDF; OCR required).");
   }
 
   const chunks = chunkText(text, 800, 120);
@@ -74,8 +75,8 @@ const { text, pages } = await extractPdfTextAndPagesFromBuffer(buffer);
     title: title || "Untitled",
     url: fileUrl,
     pages,
-    // sizeBytes: uint8.byteLength,
-    sizeBytes: buffer.length,
+    sizeBytes: uint8.byteLength,
+    //sizeBytes: buffer.length,
     collectionName,
   });
   console.log(`✅ Indexed ${chunks.length} chunks for ${title}`);

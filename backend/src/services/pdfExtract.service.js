@@ -161,39 +161,91 @@
 
 
 
-import  PDFParser  from "pdf2json";
+// import  PDFParser  from "pdf2json";
 
-export async function extractPdfTextAndPagesFromBuffer(buffer) {
-  return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser();
+// export async function extractPdfTextAndPagesFromBuffer(buffer) {
+//   return new Promise((resolve, reject) => {
+//     const pdfParser = new PDFParser();
 
-    pdfParser.on("pdfParser_dataError", (errData) => reject(errData.parserError));
+//     pdfParser.on("pdfParser_dataError", (errData) => reject(errData.parserError));
 
-    pdfParser.on("pdfParser_dataReady", (pdfData) => {
-      try {
-        let text = "";
-        pdfData?.formImage?.Pages?.forEach((page) => {
-          page.Texts.forEach((t) => {
-            const part = t.R.map((r) => decodeURIComponent(r.T)).join(" ");
-            text += part + " ";
-          });
-          text += "\n\n"; // page separator
-        });
+//     pdfParser.on("pdfParser_dataReady", (pdfData) => {
+//       try {
+//         let text = "";
+//         pdfData?.formImage?.Pages?.forEach((page) => {
+//           page.Texts.forEach((t) => {
+//             const part = t.R.map((r) => decodeURIComponent(r.T)).join(" ");
+//             text += part + " ";
+//           });
+//           text += "\n\n"; // page separator
+//         });
 
-        const numpages = pdfData?.formImage?.Pages?.length || 0;
-        resolve({ text, pages: numpages });
-      } catch (err) {
-        reject(err);
-      }
+//         const numpages = pdfData?.formImage?.Pages?.length || 0;
+//         resolve({ text, pages: numpages });
+//       } catch (err) {
+//         reject(err);
+//       }
+//     });
+
+//     pdfParser.parseBuffer(buffer);
+//   });
+// }
+
+// export async function fetchAsBuffer(url) {
+//   const res = await fetch(url);
+//   if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+//   const ab = await res.arrayBuffer();
+//   return Buffer.from(ab);
+// }
+
+
+// backend/src/services/pdfExtract.service.js
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+
+/**
+ * IMPORTANT: No external worker file; disable worker usage entirely.
+ * This avoids the “Only URLs with a scheme in: file and data … Received protocol 'https:'”
+ * and the canvas/DOMMatrix warnings on Vercel.
+ */
+pdfjs.GlobalWorkerOptions.workerSrc = undefined;
+
+export async function extractPdfTextAndPages(uint8) {
+  // Load PDF from memory buffer
+  const loadingTask = pdfjs.getDocument({
+    data: uint8,
+    // keep everything node/serverless-friendly
+    useWorkerFetch: false,
+    disableFontFace: true,
+    isEvalSupported: false,
+    standardFontDataUrl: null,
+  });
+
+  const pdf = await loadingTask.promise;
+  const numPages = pdf.numPages;
+
+  let fullText = "";
+  const pages = [];
+
+  for (let i = 1; i <= numPages; i++) {
+    const page = await pdf.getPage(i);
+
+    // Pull text items for the page
+    const textContent = await page.getTextContent({
+      normalizeWhitespace: true,
+      disableCombineTextItems: false,
     });
 
-    pdfParser.parseBuffer(buffer);
-  });
-}
+    const pageText = textContent.items
+      .map((it) => (typeof it.str === "string" ? it.str : ""))
+      .join(" ")
+      .trim();
 
-export async function fetchAsBuffer(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-  const ab = await res.arrayBuffer();
-  return Buffer.from(ab);
+    pages.push({ page: i, text: pageText });
+    if (pageText) fullText += (fullText ? "\n\n" : "") + pageText;
+  }
+
+  return {
+    text: fullText,
+    pages, // [{page, text}]
+  };
 }
