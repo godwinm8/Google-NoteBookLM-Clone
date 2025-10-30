@@ -267,8 +267,6 @@
 
 
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-
-// Node: disable worker — no external file needed in serverless
 pdfjs.GlobalWorkerOptions.workerSrc = undefined;
 
 export async function extractPdfTextAndPages(uint8) {
