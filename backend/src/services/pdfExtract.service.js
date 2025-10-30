@@ -30,14 +30,21 @@ const require = createRequire(import.meta.url);
 
 // Resolve the actual file path inside node_modules and convert to file:// URL
 const workerPath = require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs");
-pdfjsLib.GlobalWorkerOptions.workerSrc = `file://${workerPath}`;
+// pdfjsLib.GlobalWorkerOptions.workerSrc = `file://${workerPath}`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
 
 export async function extractPdfTextAndPages(data) {
   const uint8 =
     data instanceof Uint8Array ? data : new Uint8Array(data.buffer ?? data);
 
   // No special flags needed now that the worker is correctly set
-  const loadingTask = pdfjsLib.getDocument({ data: uint8 });
+  // const loadingTask = pdfjsLib.getDocument({ data: uint8 });
+  const loadingTask = pdfjsLib.getDocument({
+  data: uint8,
+  // These switches prevent worker-related fetch paths
+  isEvalSupported: false,
+  disableFontFace: true,
+});
   const pdf = await loadingTask.promise;
 
   let fullText = "";
