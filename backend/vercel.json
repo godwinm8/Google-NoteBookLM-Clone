@@ -1,18 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "src/server.js", "use": "@vercel/node" }
-  ],
+  "builds": [{ "src": "src/server.js", "use": "@vercel/node" }],
   "functions": {
     "src/server.js": {
-      "nodeBundler": "nft",
       "runtime": "nodejs20.x",
-      "includeFiles": [
-        "node_modules/pdfjs-dist/**"
-      ]
+      "nodeBundler": "nft",
+      "includeFiles": ["node_modules/pdfjs-dist/**"]
     }
   },
-  "routes": [
-    { "src": "/(.*)", "dest": "src/server.js" }
-  ]
+  "routes": [{ "src": "/(.*)", "dest": "src/server.js" }]
 }
