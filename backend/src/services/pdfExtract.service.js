@@ -1,16 +1,13 @@
-// backend/src/services/pdfExtract.service.js
-// use ESM entry and disable worker (serverless has no worker file path)
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
-pdfjs.GlobalWorkerOptions.workerSrc = undefined;
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
+
+GlobalWorkerOptions.workerSrc = null; // no worker in Node
 
 export async function extractPdfTextAndPages(uint8) {
-  const loadingTask = pdfjs.getDocument({
+  const pdf = await getDocument({
     data: uint8,
     isEvalSupported: false,
-    disableFontFace: true,
-    useSystemFonts: true,
-  });
-  const pdf = await loadingTask.promise;
+    disableFontFace: true
+  }).promise;
 
   let text = "";
   for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {

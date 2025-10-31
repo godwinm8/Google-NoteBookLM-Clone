@@ -5,9 +5,14 @@
   ],
   "functions": {
     "src/server.js": {
+      "nodeBundler": "nft",
+      "runtime": "nodejs20.x",
       "includeFiles": [
         "node_modules/pdfjs-dist/**"
       ]
     }
-  }
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "src/server.js" }
+  ]
 }
