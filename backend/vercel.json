@@ -3,7 +3,11 @@
   "builds": [
     { "src": "src/server.js", "use": "@vercel/node" }
   ],
-  "includeFiles": [
-    "node_modules/pdfjs-dist/**"
-  ]
+  "functions": {
+    "src/server.js": {
+      "includeFiles": [
+        "node_modules/pdfjs-dist/**"
+      ]
+    }
+  }
 }
