@@ -1,2 +1,3 @@
+// Ensures Vercel bundles pdfjs-dist with your backend
 import "pdfjs-dist/legacy/build/pdf.mjs";
-console.log("[boot] pdfjs-dist forced into bundle");
+console.log("✅ pdfjs-dist imported successfully");
