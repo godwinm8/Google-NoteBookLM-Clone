@@ -2,7 +2,7 @@
 const ALLOW_ORIGINS = [
   "http://localhost:5173",
   "https://google-note-book-lm-clone-ods8.vercel.app", // your exact frontend domain
-  "https://google-note-book-lm-clone.vercel.app"        // (if you use a canonical)
+  "https://google-note-book-lm-clone-6lxd.vercel.app"        // (if you use a canonical)
 ];
 
 export function corsMiddleware(req, res, next) {
