@@ -2,13 +2,10 @@
   "name": "notebooklm-backend",
   "version": "1.0.0",
   "type": "module",
-  "engines": {
-    "node": ">=20 <23"
-  },
+  "engines": { "node": "20.x" },
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "lint": "eslint . --ext .js",
     "postinstall": "node -e \"console.log('postinstall ok')\""
   },
   "dependencies": {

@@ -1,6 +1,8 @@
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
+const pdfjs = await import("pdfjs-dist/legacy/build/pdf.js"); // default-ish import
+const { getDocument, GlobalWorkerOptions } = pdfjs;
 
-GlobalWorkerOptions.workerSrc = null; // no worker in Node
+// No worker in Node
+if (GlobalWorkerOptions) GlobalWorkerOptions.workerSrc = null;
 
 export async function extractPdfTextAndPages(uint8) {
   const pdf = await getDocument({

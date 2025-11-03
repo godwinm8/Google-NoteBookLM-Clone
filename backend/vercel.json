@@ -1,12 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "src/server.js": {
-      "runtime": "nodejs22.x",
-      "includeFiles": "node_modules/pdfjs-dist/**"
-    }
-  },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "src/server.js" }
-  ]
+  "functions": { "src/server.js": { "includeFiles": "node_modules/pdfjs-dist/**" } },
+  "routes": [ { "src": "/api/(.*)", "dest": "src/server.js" } ]
 }
