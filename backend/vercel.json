@@ -2,8 +2,8 @@
   "version": 2,
   "functions": {
     "src/server.js": {
-      "includeFiles": "node_modules/pdfjs-dist/**",
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs20.x",
+      "includeFiles": "node_modules/pdfjs-dist/**"
     }
   },
   "routes": [
